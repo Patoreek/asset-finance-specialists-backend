@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const connectMongoDB = require("./config/db");
+const cors = require("cors");
 
 const authRoutes = require("./routes/authRoutes");
 
@@ -8,13 +9,20 @@ const app = express();
 app.use(express.json());
 connectMongoDB();
 
+const corsOptions = {
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
 app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Hello, Express with MongoDB!");
+  res.send("Welcome to the asset finance specialist server!");
 });
 
-const PORT = process.env.PORT || 6000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
