@@ -2,13 +2,14 @@ require("dotenv").config();
 const express = require("express");
 const connectMongoDB = require("./config/db");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 connectMongoDB();
-
 const corsOptions = {
   origin: "http://localhost:5173",
   methods: ["GET", "POST", "PUT", "DELETE"],
