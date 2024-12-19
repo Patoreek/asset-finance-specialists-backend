@@ -2,6 +2,31 @@ const Application = require("../models/Application");
 const { getUserIdFromToken } = require("../middleware/authMiddleware");
 const mongoose = require("mongoose");
 
+const getApplications = async (req, res) => {
+  const userId = getUserIdFromToken(req);
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({
+      message: "Invalid application ID",
+    });
+  }
+
+  try {
+    const applications = await Application.find({ user: userId }).populate(
+      "user",
+      "firstName lastName email phone address"
+    );
+
+    return res.status(200).json({
+      message: "Applications data returned",
+      applications: applications,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "An error occurred while retrieving the users applications",
+    });
+  }
+};
+
 const getApplication = async (req, res) => {
   const applicationId = req.params.id;
 
@@ -63,4 +88,9 @@ const updateApplication = async (req, res) => {
   console.log(req.body);
 };
 
-module.exports = { getApplication, createApplication, updateApplication };
+module.exports = {
+  getApplications,
+  getApplication,
+  createApplication,
+  updateApplication,
+};
