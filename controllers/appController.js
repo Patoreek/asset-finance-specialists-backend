@@ -88,9 +88,37 @@ const updateApplication = async (req, res) => {
   console.log(req.body);
 };
 
+const deleteApplication = async (req, res) => {
+  const applicationId = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(applicationId)) {
+    return res.status(400).json({
+      message: "Invalid application ID",
+    });
+  }
+  try {
+    const applicationDeleted = await Application.findByIdAndDelete(
+      applicationId
+    );
+    if (!applicationDeleted) {
+      return res.status(404).json({
+        message: "Application not found",
+      });
+    }
+    return res.status(200).json({
+      message: "Application deleted successfully",
+      applicationDeleted: applicationDeleted,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "An error occurred while deleting the application",
+    });
+  }
+};
 module.exports = {
   getApplications,
   getApplication,
   createApplication,
   updateApplication,
+  deleteApplication,
 };
