@@ -84,8 +84,34 @@ const createApplication = async (req, res) => {
 };
 
 const updateApplication = async (req, res) => {
-  console.log("Update Application");
-  console.log(req.body);
+  try {
+    const { id } = req.params;
+    const { applicationName, income, expenses, assets, liabilities } = req.body;
+
+    const updatedApplication = await Application.findByIdAndUpdate(
+      id,
+      {
+        name: applicationName,
+        income,
+        expenses,
+        assets,
+        liabilities,
+      },
+      { new: true }
+    );
+
+    if (!updatedApplication) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    return res.status(200).json({
+      message: "Application updated successfully",
+      application: updatedApplication,
+    });
+  } catch (error) {
+    console.error("Error updating application:", error.message);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
 
 const deleteApplication = async (req, res) => {
