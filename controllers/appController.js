@@ -1,6 +1,9 @@
 const Application = require("../models/Application");
 const { getUserIdFromToken } = require("../middleware/authMiddleware");
 const mongoose = require("mongoose");
+const winston = require("winston");
+
+const appLogger = winston.loggers.get("ApplicationLogger");
 
 const getApplications = async (req, res) => {
   const userId = getUserIdFromToken(req);
@@ -15,12 +18,15 @@ const getApplications = async (req, res) => {
       "user",
       "firstName lastName email phone address"
     );
-
     return res.status(200).json({
       message: "Applications data returned",
       applications: applications,
     });
   } catch (error) {
+    appLogger.error("Error retrieving applications", {
+      userId,
+      error: error.message,
+    });
     return res.status(500).json({
       message: "An error occurred while retrieving the users applications",
     });
@@ -52,6 +58,10 @@ const getApplication = async (req, res) => {
       application: applicationWithUser,
     });
   } catch (error) {
+    appLogger.error("Error retrieving application", {
+      applicationId,
+      error: error.message,
+    });
     return res.status(500).json({
       message: "An error occurred while retrieving the application",
     });
@@ -73,12 +83,19 @@ const createApplication = async (req, res) => {
     });
 
     await newApplication.save();
+    appLogger.info("Application created successfully", {
+      userId,
+      applicationName,
+    });
     return res.status(201).json({
       message: "Application created successfully",
       application: newApplication,
     });
   } catch (error) {
-    console.error("Error creating application:", error.message);
+    appLogger.error("Error creating application", {
+      error: error.message,
+      userId: getUserIdFromToken(req),
+    });
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -101,15 +118,20 @@ const updateApplication = async (req, res) => {
     );
 
     if (!updatedApplication) {
+      appLogger.warn("Application not found for update", { applicationId: id });
       return res.status(404).json({ message: "Application not found" });
     }
 
+    appLogger.info("Application updated successfully", { applicationId: id });
     return res.status(200).json({
       message: "Application updated successfully",
       application: updatedApplication,
     });
   } catch (error) {
-    console.error("Error updating application:", error.message);
+    appLogger.error("Error updating application", {
+      applicationId: req.params.id,
+      error: error.message,
+    });
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -118,6 +140,9 @@ const deleteApplication = async (req, res) => {
   const applicationId = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(applicationId)) {
+    appLogger.warn("Invalid application ID provided for deletion", {
+      applicationId,
+    });
     return res.status(400).json({
       message: "Invalid application ID",
     });
@@ -127,20 +152,27 @@ const deleteApplication = async (req, res) => {
       applicationId
     );
     if (!applicationDeleted) {
+      appLogger.warn("Application not found for deletion", { applicationId });
       return res.status(404).json({
         message: "Application not found",
       });
     }
+    appLogger.info("Application deleted successfully", { applicationId });
     return res.status(200).json({
       message: "Application deleted successfully",
       applicationDeleted: applicationDeleted,
     });
   } catch (error) {
+    appLogger.error("Error deleting application", {
+      applicationId,
+      error: error.message,
+    });
     return res.status(500).json({
       message: "An error occurred while deleting the application",
     });
   }
 };
+
 module.exports = {
   getApplications,
   getApplication,

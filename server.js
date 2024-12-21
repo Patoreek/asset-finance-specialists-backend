@@ -1,4 +1,5 @@
 require("dotenv").config();
+require("./loggers");
 const express = require("express");
 const connectMongoDB = require("./config/db");
 const cors = require("cors");
