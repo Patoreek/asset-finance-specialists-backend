@@ -8,6 +8,14 @@ const userLogger = winston.loggers.get("UserLogger");
 const signup = async (req, res) => {
   const { firstName, lastName, phone, address, email, password } = req.body;
   try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Email already in use",
+        success: false,
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       firstName,
@@ -46,7 +54,9 @@ const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       userLogger.warn("User provided invalid credientials", { email });
-      return res.status(400).json({ message: "Invalid credentials!" });
+      return res
+        .status(400)
+        .json({ message: "Email or password is incorrect" });
     }
 
     const accessToken = jwt.sign(
