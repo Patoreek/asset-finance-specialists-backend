@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const winston = require("winston");
 
@@ -88,6 +88,20 @@ const login = async (req, res) => {
   }
 };
 
+const logout = (req, res) => {
+  const { email } = req.body;
+
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+  });
+
+  userLogger.info("User logged out", { email });
+
+  res.status(200).json({ message: "Logout successful!" });
+};
+
 const refreshToken = async (req, res) => {
   const refreshToken = req.cookies?.refreshToken;
   if (!refreshToken) {
@@ -113,5 +127,4 @@ const refreshToken = async (req, res) => {
     res.status(403).json({ message: "Invalid or expired refresh token" });
   }
 };
-
-module.exports = { signup, login, refreshToken };
+module.exports = { signup, login, logout, refreshToken };
