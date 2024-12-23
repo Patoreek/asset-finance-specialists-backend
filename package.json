@@ -4,14 +4,17 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package": "zip -r lambda.zip . -x '*.git*' -x 'node_modules/aws-sdk/*' && echo 'Package created!",
+    "package2": "zip -r deployment-package.zip . -x 'node_modules/*' && echo 'Package created!'"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "bcrypt": "^5.1.1",
+    "aws-serverless-express": "^3.4.0",
+    "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
